@@ -6,6 +6,7 @@ import {PaginationQueryDto} from "@modules/common/dto/pagination-query.dto";
 import {CreateMovieDto} from './dto/create-movie.dto';
 import {UpdateMovieDto} from './dto/update-movie.dto';
 import {ReplaceMovieDto} from './dto/replace-movie.dto';
+import {User} from '@entities/user.entity';
 
 @Injectable()
 export class MovieService {
@@ -27,8 +28,8 @@ export class MovieService {
 
     }
 
-    async createMovie(dto: CreateMovieDto){
-        const movie = await this.movieModel.findOne({where: {title: dto.title, addedBy: dto.addedBy}})
+    async createMovie(userId: User['id'], dto: CreateMovieDto){
+        const movie = await this.movieModel.findOne({where: {title: dto.title, userId}})
 
         if (movie){
             throw new ConflictException('Фильм уже добавлен')
@@ -36,15 +37,12 @@ export class MovieService {
 
         return await this.movieModel.create({
             ...dto,
+            userId,
         })
     }
 
-    async replaceMovie(id: number, dto: ReplaceMovieDto){
-        const movie = await this.findMovieById(id)
-
-        if ( !movie ) {
-            throw new NotFoundException('Фильм не найден')
-        }
+    async replaceMovie(userId: User['id'], id: number, dto: ReplaceMovieDto){
+        const movie = await this.findMovieByIdForUser(id, userId)
 
         let watchedAt: Date | null = null
 
@@ -57,12 +55,8 @@ export class MovieService {
         } )
     }
 
-    async updateMovie(id: number, dto: UpdateMovieDto){
-        const movie = await this.findMovieById(id)
-
-        if ( !movie ) {
-            throw new NotFoundException('Фильм не найден')
-        }
+    async updateMovie(userId: User['id'], id: number, dto: UpdateMovieDto){
+        const movie = await this.findMovieByIdForUser(id, userId)
 
         const updateData: Partial<Movie> = {...dto}
 
@@ -75,18 +69,24 @@ export class MovieService {
         return await movie.update(updateData)
     }
 
-    async deleteMovie(id: number){
-        const movie = await this.findMovieById(id)
-
-        if ( !movie ) {
-            throw new NotFoundException('Фильм не найден')
-        }
+    async deleteMovie(userId: User['id'], id: number){
+        const movie = await this.findMovieByIdForUser(id, userId)
 
         await movie.destroy()
     }
 
     private async findMovieById(id: number){
         const movie = await this.movieModel.findOne({where:{id: id}})
+
+        if (!movie){
+            throw new NotFoundException('Фильм не найден')
+        }
+
+        return movie
+    }
+
+    private async findMovieByIdForUser(id: number, userId: User['id']){
+        const movie = await this.movieModel.findOne({where:{id, userId}})
 
         if (!movie){
             throw new NotFoundException('Фильм не найден')

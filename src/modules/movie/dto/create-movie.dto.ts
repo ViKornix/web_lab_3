@@ -1,5 +1,4 @@
 import {
-  IsDate,
   IsEnum,
   IsOptional,
   IsString,
@@ -8,9 +7,6 @@ import {
 import { MovieStatus } from '@entities/movie.entity';
 
 export class CreateMovieDto {
-  @IsString()
-  addedBy: string;
-
   @IsString()
   title: string;
 

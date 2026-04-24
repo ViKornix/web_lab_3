@@ -1,7 +1,7 @@
+name: lab3
 services:
   postgres:
     image: postgres:16
-    container_name: wp_labs_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -10,7 +10,7 @@ services:
     ports:
       - ":5432"
     volumes:
-      - wp_labs_postgres:/var/lib/postgresql/data
+      - wp_labs_postgres3:/var/lib/postgresql/data
     networks:
       - wp_labs_network
     healthcheck:
@@ -21,20 +21,31 @@ services:
 
   app:
     build: .
-    container_name: wp_labs_app
     restart: unless-stopped
     environment:
+      NODE_ENV: ${NODE_ENV}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      DB_DIALECT: ${DB_DIALECT}
+      DB_LOGGING: ${DB_LOGGING}
       PORT: 4200
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE}
+      AUTH_OAUTH_SUCCESS_REDIRECT: ${AUTH_OAUTH_SUCCESS_REDIRECT}
+      YANDEX_OAUTH_CLIENT_ID: ${YANDEX_OAUTH_CLIENT_ID}
+      YANDEX_OAUTH_CLIENT_SECRET: ${YANDEX_OAUTH_CLIENT_SECRET}
+      YANDEX_OAUTH_REDIRECT_URI: ${YANDEX_OAUTH_REDIRECT_URI}
+      YANDEX_OAUTH_SCOPE: ${YANDEX_OAUTH_SCOPE}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "4200:4200"
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - wp_labs_network
 
@@ -42,11 +53,14 @@ services:
     build: .
     command: npm run db:migrate
     environment:
+      NODE_ENV: ${NODE_ENV}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      DB_DIALECT: ${DB_DIALECT}
+      DB_LOGGING: ${DB_LOGGING}
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,7 +69,7 @@ services:
 
 
 volumes:
-  wp_labs_postgres:
+  wp_labs_postgres3:
 
 networks:
   wp_labs_network:

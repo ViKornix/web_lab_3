@@ -9,9 +9,12 @@ import {
   CreatedAt,
   UpdatedAt,
   DeletedAt,
-  AutoIncrement
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { Optional } from  'sequelize'
+import {User} from '@entities/user.entity';
 
 export enum MovieStatus {
   Planned = 'planned',
@@ -20,7 +23,8 @@ export enum MovieStatus {
 
 export type MovieAttributes = {
   id: number;
-  addedBy: string;
+  userId: number;
+  user: User;
   title: string;
   description: string | null;
   posterUrl: string | null;
@@ -35,6 +39,7 @@ export type MovieAttributes = {
 export type MovieCreationAttributes = Optional<
     MovieAttributes,
     | 'id'
+    | 'user'
     | 'description'
     | 'posterUrl'
     | 'status'
@@ -57,10 +62,13 @@ export class Movie extends Model<MovieAttributes, MovieCreationAttributes> {
   @Column(DataType.INTEGER)
   declare id: number;
 
-
   @AllowNull(false)
-  @Column({ type: DataType.STRING, field: 'added_by' })
-  declare addedBy: string;
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER, field: 'user_id' })
+  declare userId: number;
+
+  @BelongsTo(() => User)
+  declare user: User;
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -84,11 +92,9 @@ export class Movie extends Model<MovieAttributes, MovieCreationAttributes> {
   declare watchedAt: Date | null;
 
   @CreatedAt
-  @Column({ type: DataType.DATE, field: 'created_at' })
   declare createdAt: Date;
 
   @UpdatedAt
-  @Column({ type: DataType.DATE, field: 'updated_at' })
   declare updatedAt: Date;
 
   @DeletedAt

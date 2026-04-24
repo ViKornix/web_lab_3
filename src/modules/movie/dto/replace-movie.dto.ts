@@ -1,5 +1,4 @@
 import {
-  IsDefined,
   IsEnum,
   IsString,
   IsUrl, ValidateIf,
@@ -7,9 +6,6 @@ import {
 import { MovieStatus } from '@entities/movie.entity';
 
 export class ReplaceMovieDto {
-  @IsString()
-  addedBy: string;
-
   @IsString()
   title: string;
 
