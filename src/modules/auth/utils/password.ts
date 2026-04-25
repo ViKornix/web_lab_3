@@ -1,15 +1,9 @@
-import {subtle} from 'crypto';
-import {bufferToHex} from '@modules/auth/utils/crypto';
+import * as argon2 from 'argon2'
 
-export function generateSalt(): string {
-    const bytes = new Uint8Array(16);
-    crypto.getRandomValues(bytes);
-    return bufferToHex(bytes);
+export async function hashPassword(password: string): Promise<string> {
+    return await argon2.hash(password)
 }
 
-export async function hashPassword(salt: string, password: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const hashBuffer = await subtle.digest('SHA-512', encoder.encode(password + salt));
-
-    return bufferToHex(hashBuffer);
+export async function verifyPassword(hash: string, password: string): Promise<boolean> {
+    return await argon2.verify(hash, password)
 }

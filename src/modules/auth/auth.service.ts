@@ -12,7 +12,7 @@ import {InjectModel} from "@nestjs/sequelize";
 import {User} from "@entities/user.entity";
 import {Token, TokenTypes} from "@entities/token.entity";
 import {LoginDto} from "@modules/auth/dto/login.dto";
-import {generateSalt, hashPassword} from "@modules/auth/utils/password";
+import {hashPassword, verifyPassword} from "@modules/auth/utils/password";
 import {hashToken} from "@modules/auth/utils/token";
 import {AUTH_PROVIDERS, AuthProvider} from '@modules/auth/auth.constants';
 import {YandexClient, YandexUserResponse} from '@modules/auth/clients/yandex.client';
@@ -52,10 +52,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-
-    const salt = generateSalt()
-    //TODO argon2 использовать
-    const hash = await hashPassword(salt, dto.passwd)
+    const hash = await hashPassword(dto.passwd)
     const existedUser = await this.userModel.findOne({where:{phone: dto.phone}})
     if (existedUser){
       throw new ConflictException('User already exist')
@@ -63,7 +60,7 @@ export class AuthService {
     const user = await this.userModel.create(
         {
           phone: dto.phone,
-          passwdSalt: salt,
+          passwdSalt: null,
           passwdHash: hash
         }
     )
@@ -88,13 +85,13 @@ export class AuthService {
       throw new UnauthorizedException('Введен неверный логин или пароль')
     }
 
-    if (!user.passwdSalt || !user.passwdHash) {
+    if (!user.passwdHash) {
       throw new UnauthorizedException('Для этого аккаунта вход по паролю недоступен')
     }
 
-    const passwdHash = await hashPassword(user.passwdSalt, dto.passwd)
+    const isValidPassword = await verifyPassword(user.passwdHash, dto.passwd)
 
-    if ( passwdHash !== user.passwdHash){
+    if (!isValidPassword){
       throw new UnauthorizedException('Введен неверный логин или пароль')
     }
 
@@ -136,11 +133,10 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const salt = generateSalt();
-    const passwdHash = await hashPassword(salt, dto.newPassword);
+    const passwdHash = await hashPassword(dto.newPassword);
 
     await user.update({
-      passwdSalt: salt,
+      passwdSalt: null,
       passwdHash,
     });
 

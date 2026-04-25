@@ -17,7 +17,6 @@ export type UserAttributes = {
     phone: string | null;
     yandexId: string | null;
     passwdHash: string | null;
-    passwdSalt: string | null;
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date | null;
@@ -29,7 +28,6 @@ export type UserCreationAttributes = Optional<
     | 'phone'
     | 'yandexId'
     | 'passwdHash'
-    | 'passwdSalt'
     | 'createdAt'
     | 'updatedAt'
     | 'deletedAt'
@@ -56,10 +54,6 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
     @AllowNull(true)
     @Column({ type: DataType.STRING, field: 'passwd_hash' })
     declare passwdHash: string | null;
-
-    @AllowNull(true)
-    @Column({ type: DataType.STRING, field: 'passwd_salt' })
-    declare passwdSalt: string | null;
 
     @CreatedAt
     declare createdAt: Date;
