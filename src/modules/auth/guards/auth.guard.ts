@@ -22,13 +22,13 @@ export class AuthGuard implements CanActivate {
         const token: string | undefined = req.cookies?.[AUTH_COOKIES[TokenTypes.ACCESS]];
 
         if (!token) {
-            throw new UnauthorizedException('Access token not found');
+            throw new UnauthorizedException('Access-токен не найден');
         }
 
         const payload = await this.authService.validateToken(token, TokenTypes.ACCESS);
 
         if (!payload) {
-            throw new UnauthorizedException('Invalid access token');
+            throw new UnauthorizedException('Недействительный access-токен');
         }
 
         req.user = payload;

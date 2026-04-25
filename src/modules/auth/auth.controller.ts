@@ -111,7 +111,7 @@ export class AuthController {
       const refreshToken: string | undefined = req.cookies?.[AUTH_COOKIES[TokenTypes.REFRESH]];
 
       if (!refreshToken) {
-          throw new UnauthorizedException('Refresh token not found');
+          throw new UnauthorizedException('Refresh-токен не найден');
       }
 
       const {accessToken, refreshToken: nextRefreshToken} = await this.authService.refresh(refreshToken);
@@ -142,7 +142,7 @@ export class AuthController {
       const resetToken: string | undefined = req.cookies?.[AUTH_COOKIES[TokenTypes.RESET_PASSWORD]];
 
       if (!resetToken) {
-          throw new UnauthorizedException('Reset password token not found');
+          throw new UnauthorizedException('Токен сброса пароля не найден');
       }
 
       await this.authService.resetPassword(dto, resetToken);

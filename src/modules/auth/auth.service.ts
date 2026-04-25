@@ -45,7 +45,7 @@ export class AuthService {
 
   getOAuthAuthorizationUrl(provider: AuthProvider, state: string) {
     if (provider !== AUTH_PROVIDERS.YANDEX) {
-      throw new BadRequestException(`Unsupported OAuth provider: ${provider}`);
+      throw new BadRequestException(`Неподдерживаемый OAuth-провайдер: ${provider}`);
     }
 
     return this.yandexClient.getAuthorizationUrl(state);
@@ -55,7 +55,7 @@ export class AuthService {
     const hash = await hashPassword(dto.passwd)
     const existedUser = await this.userModel.findOne({where:{phone: dto.phone}})
     if (existedUser){
-      throw new ConflictException('User already exist')
+      throw new ConflictException('Пользователь уже существует')
     }
     const user = await this.userModel.create(
         {
@@ -123,13 +123,13 @@ export class AuthService {
     const payload = await this.validateToken(resetToken, TokenTypes.RESET_PASSWORD);
 
     if (!payload) {
-      throw new UnauthorizedException('Reset password token is invalid');
+      throw new UnauthorizedException('Токен сброса пароля недействителен');
     }
 
     const user = await this.userModel.findByPk(payload.sub);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Пользователь не найден');
     }
 
     const passwdHash = await hashPassword(dto.newPassword);
@@ -241,7 +241,7 @@ export class AuthService {
     const payload = await this.validateToken(refreshToken, TokenTypes.REFRESH);
 
     if (!payload) {
-      throw new UnauthorizedException('Refresh token is invalid');
+      throw new UnauthorizedException('Refresh-токен недействителен');
     }
 
     const refreshTokenRecord = await this.tokenModel.findOne({
@@ -253,7 +253,7 @@ export class AuthService {
     });
 
     if (!refreshTokenRecord) {
-      throw new UnauthorizedException('Refresh token is invalid');
+      throw new UnauthorizedException('Refresh-токен недействителен');
     }
 
     const accessToken = await this.issueToken(payload.sub, TokenTypes.ACCESS);
@@ -286,7 +286,7 @@ export class AuthService {
     const user = await this.userModel.findByPk(userId);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Пользователь не найден');
     }
 
     return {
@@ -300,15 +300,15 @@ export class AuthService {
 
   async authenticateWithOAuth(provider: AuthProvider, code: string, state?: string, expectedState?: string) {
     if (provider !== AUTH_PROVIDERS.YANDEX) {
-      throw new BadRequestException(`Unsupported OAuth provider: ${provider}`);
+      throw new BadRequestException(`Неподдерживаемый OAuth-провайдер: ${provider}`);
     }
 
     if (!code) {
-      throw new BadRequestException('OAuth code is required');
+      throw new BadRequestException('Требуется OAuth-код');
     }
 
     if (!state || !expectedState || state !== expectedState) {
-      throw new UnauthorizedException('OAuth state is invalid');
+      throw new UnauthorizedException('Параметр состояния OAuth недействителен');
     }
 
     const yandexToken = await this.yandexClient.exchangeCode(code);
@@ -326,7 +326,7 @@ export class AuthService {
 
   private async findOrCreateOAuthUser(yandexUser: YandexUserResponse) {
     if (!yandexUser.id) {
-      throw new BadGatewayException('Yandex user profile did not include id');
+      throw new BadGatewayException('Профиль пользователя Яндекса не содержит id');
     }
 
     const phone = yandexUser.default_phone?.number ?? null;

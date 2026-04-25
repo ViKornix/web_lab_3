@@ -28,7 +28,7 @@ export class YandexClient {
         const redirectUri = process.env.YANDEX_OAUTH_REDIRECT_URI;
 
         if (!clientId || !redirectUri) {
-            throw new BadRequestException('Yandex OAuth is not configured');
+            throw new BadRequestException('Yandex OAuth не настроен');
         }
 
         const url = new URL(this.authorizeUrl);
@@ -47,7 +47,7 @@ export class YandexClient {
         const redirectUri = process.env.YANDEX_OAUTH_REDIRECT_URI;
 
         if (!clientId || !clientSecret || !redirectUri) {
-            throw new BadRequestException('Yandex OAuth is not configured');
+            throw new BadRequestException('Yandex OAuth не настроен');
         }
 
         const body = new URLSearchParams({
@@ -73,7 +73,7 @@ export class YandexClient {
         } catch (error) {
             if (error instanceof AxiosError) {
                 throw new BadGatewayException(
-                    `Failed to exchange Yandex OAuth code: ${error.response?.status ?? error.code ?? 'request failed'}`,
+                    `Не удалось обменять OAuth-код Яндекса: ${error.response?.status ?? error.code ?? 'ошибка запроса'}`,
                 );
             }
 
@@ -96,7 +96,7 @@ export class YandexClient {
         } catch (error) {
             if (error instanceof AxiosError) {
                 throw new BadGatewayException(
-                    `Failed to fetch Yandex user profile: ${error.response?.status ?? error.code ?? 'request failed'}`,
+                    `Не удалось получить профиль пользователя Яндекса: ${error.response?.status ?? error.code ?? 'ошибка запроса'}`,
                 );
             }
 
