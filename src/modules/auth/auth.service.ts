@@ -60,7 +60,6 @@ export class AuthService {
     const user = await this.userModel.create(
         {
           phone: dto.phone,
-          passwdSalt: null,
           passwdHash: hash
         }
     )
@@ -136,7 +135,6 @@ export class AuthService {
     const passwdHash = await hashPassword(dto.newPassword);
 
     await user.update({
-      passwdSalt: null,
       passwdHash,
     });
 
@@ -355,7 +353,6 @@ export class AuthService {
       yandexId: yandexUser.id,
       phone,
       passwdHash: null,
-      passwdSalt: null,
     });
   }
 
